@@ -42,7 +42,7 @@ export class AuthService {
     async refreshAccessToken(refreshToken: string) {
         try {
             const decoded = this.jwtService.verify<{ id: string }>(refreshToken);
-            const user = await this.prisma.users.findUnique({ where: { id: BigInt(decoded.id) } });
+            const user = await this.prisma.users.findUnique({ where: { id: Number(decoded.id) } });
 
             if (!user) throw new NotFoundException('Người dùng không tồn tại.');
 

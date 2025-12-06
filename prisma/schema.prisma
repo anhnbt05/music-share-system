@@ -9,38 +9,38 @@ datasource db {
 }
 
 model activity_logs {
-  id          BigInt   @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   action_type String   @db.VarChar(255)
   description String?  @db.VarChar(255)
-  object_id   BigInt?
+  object_id   Int?
   object_type String?  @db.VarChar(255)
   timestamp   DateTime @db.Timestamp(6)
-  user_id     BigInt
+  user_id     Int
   users       users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk5bm1lt4f4eevt8lv2517soakd")
 }
 
 model album_tracks {
-  id          BigInt @id @default(autoincrement())
+  id          Int @id @default(autoincrement())
   track_order Int?
-  album_id    BigInt
-  track_id    BigInt
+  album_id    Int
+  track_id    Int
   albums      albums @relation(fields: [album_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fko4h9jsejt47trsyxxbnm27fih")
   music       music  @relation(fields: [track_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fktdpasxwh92wfaravfnfxslebr")
 }
 
 model albums {
-  id              BigInt          @id @default(autoincrement())
+  id              Int          @id @default(autoincrement())
   cover_url       String?         @db.VarChar(255)
   created_at      DateTime        @db.Timestamp(6)
   description     String?
   title           String          @db.VarChar(255)
-  artist_id       BigInt
+  artist_id       Int
   album_tracks    album_tracks[]
   artist_profiles artist_profiles @relation(fields: [artist_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkjufclcqx1dtxy7dxtqf2syaba")
 }
 
 model artist_applications {
-  id               BigInt   @id @default(autoincrement())
+  id               Int   @id @default(autoincrement())
   bio              String?
   created_at       DateTime @db.Timestamp(6)
   photo_url        String?  @db.VarChar(255)
@@ -48,19 +48,19 @@ model artist_applications {
   social_links     String?
   stage_name       String   @db.VarChar(255)
   status           String   @db.VarChar(255)
-  user_id          BigInt
+  user_id          Int
   users            users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkssd1v0iuj5xikuglggw4u0a3q")
 }
 
 model artist_profiles {
-  id           BigInt    @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
   bio          String?
   photo_url    String?   @db.VarChar(255)
   social_links String?
   stage_name   String?   @db.VarChar(255)
   status       String    @db.VarChar(255)
   updated_at   DateTime? @db.Timestamp(6)
-  user_id      BigInt    @unique(map: "uk55uqdb7kdrtkjj1f3choucp4e")
+  user_id      Int    @unique(map: "uk55uqdb7kdrtkjj1f3choucp4e")
   albums       albums[]
   users        users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkklsnkuj4ujtummfegmtvvtw6u")
   follows      follows[]
@@ -69,23 +69,23 @@ model artist_profiles {
 }
 
 model follows {
-  id                 BigInt          @id @default(autoincrement())
+  id                 Int          @id @default(autoincrement())
   created_at         DateTime        @db.Timestamp(6)
-  followed_artist_id BigInt
-  follower_user_id   BigInt
+  followed_artist_id Int
+  follower_user_id   Int
   artist_profiles    artist_profiles @relation(fields: [followed_artist_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkca63964l78cm3wtd07fej8log")
   users              users           @relation(fields: [follower_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke53q5i2pk9a4rddeb47cac9rd")
 }
 
 model music {
-  id              BigInt            @id @default(autoincrement())
+  id              Int            @id @default(autoincrement())
   created_at      DateTime          @db.Timestamp(6)
   description     String?
   file_url        String            @db.VarChar(255)
   genre           String?           @db.VarChar(255)
   title           String            @db.VarChar(255)
   vote_count      Int
-  artist_id       BigInt
+  artist_id       Int
   album_tracks    album_tracks[]
   artist_profiles artist_profiles   @relation(fields: [artist_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkev9p98erhlcit6djb4rr7bduw")
   music_stats     music_stats[]
@@ -95,44 +95,44 @@ model music {
 }
 
 model music_stats {
-  id         BigInt   @id @default(autoincrement())
+  id         Int   @id @default(autoincrement())
   listens    Int
   shares     Int
   updated_at DateTime @db.Timestamp(6)
-  music_id   BigInt
+  music_id   Int
   music      music    @relation(fields: [music_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkfp7hpsjypuqka8ih2knyb7aog")
 }
 
 model playlist_tracks {
-  id          BigInt    @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   added_at    DateTime  @db.Timestamp(6)
   track_order Int?
-  track_id    BigInt
-  playlist_id BigInt
+  track_id    Int
+  playlist_id Int
   music       music     @relation(fields: [track_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk135p540sl7xth23x38he9ecjl")
   playlists   playlists @relation(fields: [playlist_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkn9g4py06v2tmrisjdvxvjeb7x")
 }
 
 model playlists {
-  id              BigInt            @id @default(autoincrement())
+  id              Int            @id @default(autoincrement())
   creation_date   DateTime          @db.Timestamp(6)
   name            String            @db.VarChar(255)
-  user_id         BigInt
+  user_id         Int
   playlist_tracks playlist_tracks[]
   users           users             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fktgjwvfg23v990xk7k0idmqbrj")
 }
 
 model reports {
-  id                                    BigInt           @id @default(autoincrement())
+  id                                    Int           @id @default(autoincrement())
   reason                                String           @db.VarChar(255)
   report_date                           DateTime         @db.Timestamp(6)
   report_type                           String           @db.VarChar(255)
   resolution_notes                      String?          @db.VarChar(255)
   status                                String           @db.VarChar(255)
-  reported_artist_id                    BigInt?
-  reported_music_id                     BigInt?
-  reported_user_id                      BigInt?
-  reporter_user_id                      BigInt
+  reported_artist_id                    Int?
+  reported_music_id                     Int?
+  reported_user_id                      Int?
+  reporter_user_id                      Int
   users_reports_reported_user_idTousers users?           @relation("reports_reported_user_idTousers", fields: [reported_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkb3bqi44mjskbnwupr31nfq5ui")
   users_reports_reporter_user_idTousers users            @relation("reports_reporter_user_idTousers", fields: [reporter_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkbn9mhatckeho3v3ahbryj4vsw")
   music                                 music?           @relation(fields: [reported_music_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fke6g1krfghal8fpga7lljnm8t9")
@@ -140,7 +140,7 @@ model reports {
 }
 
 model users {
-  id                                      BigInt                @id @default(autoincrement())
+  id                                      Int                @id @default(autoincrement())
   email                                   String                @unique(map: "uk6dotkott2kjsp8vw4d0m25fb7") @db.VarChar(255)
   name                                    String                @db.VarChar(255)
   password                                String                @db.VarChar(255)
@@ -159,11 +159,11 @@ model users {
 }
 
 model votes {
-  id         BigInt   @id @default(autoincrement())
+  id         Int   @id @default(autoincrement())
   created_at DateTime @db.Timestamp(6)
   vote_type  String   @db.VarChar(255)
-  track_id   BigInt
-  user_id    BigInt
+  track_id   Int
+  user_id    Int
   music      music    @relation(fields: [track_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkjoo59vlkgtmlqnl8vp57nwb49")
   users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkli4uj3ic2vypf5pialchj925e")
 }
