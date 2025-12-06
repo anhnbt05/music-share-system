@@ -146,6 +146,7 @@ model users {
   password                                String                @db.VarChar(255)
   created_at                              DateTime              @db.Timestamp(6)
   is_deleted                              Boolean
+  is_active   Boolean  @default(false)
   role                                    String                @db.VarChar(255)
   activity_logs                           activity_logs[]
   artist_applications                     artist_applications[]
