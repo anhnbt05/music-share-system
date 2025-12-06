@@ -7,7 +7,7 @@ export function setupSwagger(app: INestApplication, configService: ConfigService
 
     const config = new DocumentBuilder()
         .setTitle('API Documentation')
-        .setDescription('Tài liệu API cho dự án Cinema Booking')
+        .setDescription('Tài liệu API cho dự án Music Share')
         .setVersion('1.0.0')
         .addServer(apiUrl)
         .addBearerAuth()
