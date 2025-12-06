@@ -132,7 +132,7 @@ export class AdminService {
     }
 
     // Xóa tài khoản
-    async deleteAccount(userId: bigint, dto: DeleteAccountDto) {
+    async deleteAccount(userId: number, dto: DeleteAccountDto) {
         if (!dto.confirm) {
             throw new BadRequestException('Vui lòng xác nhận xóa tài khoản');
         }
@@ -158,7 +158,7 @@ export class AdminService {
     }
 
     // Reset mật khẩu người dùng
-    async resetUserPassword(userId: bigint) {
+    async resetUserPassword(userId: number) {
         const user = await this.prisma.users.findUnique({
             where: { id: userId, is_deleted: false },
         });
@@ -225,7 +225,7 @@ export class AdminService {
     }
 
     // Xử lý ứng dụng artist
-    async processArtistApplication(applicationId: bigint, dto: ProcessApplicationDto) {
+    async processArtistApplication(applicationId: number, dto: ProcessApplicationDto) {
         const application = await this.prisma.artist_applications.findUnique({
             where: { id: applicationId },
             include: { users: true },
@@ -344,7 +344,7 @@ export class AdminService {
     }
 
     // Xử lý báo cáo
-    async resolveReport(reportId: bigint, dto: ResolveReportDto) {
+    async resolveReport(reportId: number, dto: ResolveReportDto) {
         const report = await this.prisma.reports.findUnique({
             where: { id: reportId },
         });
@@ -368,7 +368,7 @@ export class AdminService {
     }
 
     // Xóa bài hát
-    async deleteMusic(trackId: bigint) {
+    async deleteMusic(trackId: number) {
         const track = await this.prisma.music.findUnique({
             where: { id: trackId },
             include: {
@@ -392,7 +392,7 @@ export class AdminService {
     }
 
     // Lấy thông tin chi tiết người dùng
-    async getUserDetails(userId: bigint) {
+    async getUserDetails(userId: number) {
         const user = await this.prisma.users.findUnique({
             where: { id: userId, is_deleted: false },
             include: {

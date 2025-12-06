@@ -54,13 +54,13 @@ export class AdminController {
         @Param('userId') userId: string,
         @Body() dto: DeleteAccountDto,
     ) {
-        return this.adminService.deleteAccount(BigInt(userId), dto);
+        return this.adminService.deleteAccount(Number(userId), dto);
     }
 
     @Post('accounts/:userId/reset-password')
     @ApiOperation({ summary: 'Reset mật khẩu người dùng' })
     async resetUserPassword(@Param('userId') userId: string) {
-        return this.adminService.resetUserPassword(BigInt(userId));
+        return this.adminService.resetUserPassword(Number(userId));
     }
 
     // Quản lý ứng dụng artist
@@ -76,7 +76,7 @@ export class AdminController {
         @Param('id') id: string,
         @Body() dto: ProcessApplicationDto,
     ) {
-        return this.adminService.processArtistApplication(BigInt(id), dto);
+        return this.adminService.processArtistApplication(Number(id), dto);
     }
 
     // Quản lý báo cáo
@@ -92,7 +92,7 @@ export class AdminController {
         @Param('id') id: string,
         @Body() dto: ResolveReportDto,
     ) {
-        return this.adminService.resolveReport(BigInt(id), dto);
+        return this.adminService.resolveReport(Number(id), dto);
     }
 
     // Quản lý âm nhạc
@@ -100,13 +100,13 @@ export class AdminController {
     @ApiOperation({ summary: 'Xóa bài hát' })
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteMusic(@Param('trackId') trackId: string) {
-        return this.adminService.deleteMusic(BigInt(trackId));
+        return this.adminService.deleteMusic(Number(trackId));
     }
 
     // Thông tin người dùng/artist
     @Get('users/:userId/details')
     @ApiOperation({ summary: 'Lấy thông tin chi tiết người dùng' })
     async getUserDetails(@Param('userId') userId: string) {
-        return this.adminService.getUserDetails(BigInt(userId));
+        return this.adminService.getUserDetails(Number(userId));
     }
 }
