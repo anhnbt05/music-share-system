@@ -32,7 +32,7 @@ export class AuthService {
             throw new ForbiddenException('Tài khoản đã bị khóa.');
         }
 
-        const payload = { id: user.id, email: user.email, role: user.role };
+        const payload = { id: user.id.toString(), email: user.email, role: user.role };
         const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
         const refreshToken = this.jwtService.sign({ id: user.id }, { expiresIn: '7d' });
 

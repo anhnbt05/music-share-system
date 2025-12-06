@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { RedisModule } from './config/redis.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { AdminModule } from './modules/admin/admin.module'
 
 @Module({
   imports: [
@@ -53,7 +54,8 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     RedisModule,
     PrismaModule,
-    AuthModule
+    AuthModule,
+    AdminModule
   ],
   controllers: [AppController],
   providers: [AppService],
