@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AdminModule } from './modules/admin/admin.module'
 import { UserModule } from './modules/user/user.module';
 import { ArtistModule } from './modules/artist/artist.module';
+import { MusicModule } from './modules/music/music.module';
 
 @Module({
   imports: [
@@ -59,7 +60,8 @@ import { ArtistModule } from './modules/artist/artist.module';
     AuthModule,
     AdminModule,
     UserModule,
-    ArtistModule
+    ArtistModule,
+    MusicModule
   ],
   controllers: [AppController],
   providers: [AppService],
