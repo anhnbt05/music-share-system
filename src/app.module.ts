@@ -11,6 +11,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AdminModule } from './modules/admin/admin.module'
 import { UserModule } from './modules/user/user.module';
+import { ArtistModule } from './modules/artist/artist.module';
 
 @Module({
   imports: [
@@ -57,7 +58,8 @@ import { UserModule } from './modules/user/user.module';
     PrismaModule,
     AuthModule,
     AdminModule,
-    UserModule
+    UserModule,
+    ArtistModule
   ],
   controllers: [AppController],
   providers: [AppService],
