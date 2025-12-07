@@ -10,6 +10,7 @@ import { RedisModule } from './config/redis.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AdminModule } from './modules/admin/admin.module'
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -55,7 +56,8 @@ import { AdminModule } from './modules/admin/admin.module'
     RedisModule,
     PrismaModule,
     AuthModule,
-    AdminModule
+    AdminModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],
