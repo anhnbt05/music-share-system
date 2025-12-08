@@ -42,9 +42,9 @@ export class ArtistApplicationFilterDto {
     order?: 'asc' | 'desc';
 }
 export class ProcessApplicationDto {
-    @ApiProperty({ example: 123 })
-    @IsInt({ message: 'applicationId phải là số nguyên' })
-    applicationId: number;
+    // @ApiProperty({ example: 123 })
+    // @IsInt({ message: 'applicationId phải là số nguyên' })
+    // applicationId: number;
 
     @ApiProperty({
         enum: ['APPROVE', 'REJECT'],
@@ -59,5 +59,5 @@ export class ProcessApplicationDto {
     })
     @IsOptional()
     @IsString()
-    reason?: string;
+    rejectionReason?: string;
 }

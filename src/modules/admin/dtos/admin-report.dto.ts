@@ -46,13 +46,13 @@ export class ReportFilterDto {
 }
 
 export class ResolveReportDto {
-    @ApiProperty({
-        example: 101,
-        description: 'ID của báo cáo cần xử lý'
-    })
-    @IsInt({ message: 'reportId phải là số nguyên' })
-    @Min(1, { message: 'reportId phải lớn hơn 0' })
-    reportId: number;
+    // @ApiProperty({
+    //     example: 101,
+    //     description: 'ID của báo cáo cần xử lý'
+    // })
+    // @IsInt({ message: 'reportId phải là số nguyên' })
+    // @Min(1, { message: 'reportId phải lớn hơn 0' })
+    // reportId: number;
 
     @ApiProperty({
         required: false,
