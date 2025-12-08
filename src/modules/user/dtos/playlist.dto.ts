@@ -10,14 +10,14 @@ export class CreatePlaylistDto {
     @Length(1, 100)
     name: string;
 
-    @ApiProperty({
-        required: false,
-        example: 'Những bài hát nghe lúc thư giãn',
-        description: 'Mô tả ngắn về playlist',
-    })
-    @IsOptional()
-    @IsString()
-    description?: string;
+    // @ApiProperty({
+    //     required: false,
+    //     example: 'Những bài hát nghe lúc thư giãn',
+    //     description: 'Mô tả ngắn về playlist',
+    // })
+    // @IsOptional()
+    // @IsString()
+    // description?: string;
 }
 
 export class UpdatePlaylistDto {
