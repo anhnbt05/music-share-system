@@ -1,4 +1,3 @@
-// src/admin/admin.service.ts
 import {
     Injectable,
     NotFoundException,
@@ -27,7 +26,6 @@ export class AdminService {
         private readonly storageService: StorageService,
     ) { }
 
-    // Gán vai trò
     async assignRole(dto: AssignRoleDto) {
         const { userId, newRole } = dto;
 
@@ -39,14 +37,12 @@ export class AdminService {
             throw new NotFoundException('Người dùng không tồn tại');
         }
 
-        // Nếu chuyển từ USER sang ARTIST
         if (user.role === 'USER' && newRole === 'ARTIST') {
             let artistProfile = await this.prisma.artist_profiles.findUnique({
                 where: { user_id: userId },
             });
 
             if (!artistProfile) {
-                // Tạo profile artist mới
                 artistProfile = await this.prisma.artist_profiles.create({
                     data: {
                         user_id: userId,
@@ -56,7 +52,6 @@ export class AdminService {
                     },
                 });
             } else if (artistProfile.status === 'INACTIVE') {
-                // Kích hoạt lại profile
                 artistProfile = await this.prisma.artist_profiles.update({
                     where: { id: artistProfile.id },
                     data: { status: 'ACTIVE', updated_at: new Date() },
@@ -64,14 +59,12 @@ export class AdminService {
             }
         }
 
-        // Nếu chuyển từ ARTIST sang USER
         if (user.role === 'ARTIST' && newRole === 'USER') {
             const artistProfile = await this.prisma.artist_profiles.findUnique({
                 where: { user_id: userId },
             });
 
             if (artistProfile) {
-                // Đánh dấu profile là inactive
                 await this.prisma.artist_profiles.update({
                     where: { id: artistProfile.id },
                     data: { status: 'INACTIVE', updated_at: new Date() },
@@ -79,7 +72,6 @@ export class AdminService {
             }
         }
 
-        // Cập nhật vai trò
         const updatedUser = await this.prisma.users.update({
             where: { id: userId },
             data: { role: newRole },
@@ -94,7 +86,6 @@ export class AdminService {
         };
     }
 
-    // Tìm kiếm tài khoản
     async searchAccounts(dto: SearchAccountDto) {
         const { query, page = 1, limit = 10 } = dto;
         const skip = (page - 1) * limit;
@@ -131,13 +122,12 @@ export class AdminService {
         };
     }
 
-    // Xóa tài khoản
     async deleteAccount(userId: number, dto: DeleteAccountDto) {
         if (!dto.confirm) {
             throw new BadRequestException('Vui lòng xác nhận xóa tài khoản');
         }
 
-        const user = await this.prisma.users.findUnique({
+        const user = await this.prisma.users.findFirst({
             where: { id: userId, is_deleted: false },
         });
 
@@ -145,7 +135,6 @@ export class AdminService {
             throw new NotFoundException('Người dùng không tồn tại');
         }
 
-        // Soft delete
         await this.prisma.users.update({
             where: { id: userId },
             data: {
@@ -157,29 +146,24 @@ export class AdminService {
         return { message: 'Xóa tài khoản thành công' };
     }
 
-    // Reset mật khẩu người dùng
-    async resetUserPassword(userId: number) {
-        const user = await this.prisma.users.findUnique({
-            where: { id: userId, is_deleted: false },
-        });
+    // async resetUserPassword(userId: number) {
+    //     const user = await this.prisma.users.findUnique({
+    //         where: { id: userId, is_deleted: false },
+    //     });
 
-        if (!user) {
-            throw new NotFoundException('Người dùng không tồn tại');
-        }
+    //     if (!user) {
+    //         throw new NotFoundException('Người dùng không tồn tại');
+    //     }
 
-        // Tạo token reset password (có thể dùng JWT hoặc random string)
-        const resetToken = Math.random().toString(36).substring(2, 15);
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    //     const resetToken = Math.random().toString(36).substring(2, 15);
+    //     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-        // Lưu token vào database hoặc Redis
-        // ...
-        return {
-            message: 'Email reset password đã được gửi',
-            resetUrl, // Trả về cho admin trong môi trường dev
-        };
-    }
+    //     return {
+    //         message: 'Email reset password đã được gửi',
+    //         resetUrl,
+    //     };
+    // }
 
-    // Lấy danh sách ứng dụng artist
     async getArtistApplications(filter: ArtistApplicationFilterDto) {
         const {
             status = 'PENDING',
@@ -224,7 +208,6 @@ export class AdminService {
         };
     }
 
-    // Xử lý ứng dụng artist
     async processArtistApplication(applicationId: number, dto: ProcessApplicationDto) {
         const application = await this.prisma.artist_applications.findUnique({
             where: { id: applicationId },
@@ -232,23 +215,21 @@ export class AdminService {
         });
 
         if (!application) {
-            throw new NotFoundException('Ứng dụng không tồn tại');
+            throw new NotFoundException('Yêu cầu không tồn tại');
         }
 
         if (application.status !== 'PENDING') {
-            throw new BadRequestException('Ứng dụng đã được xử lý');
+            throw new BadRequestException('Yêu cầu đã được xử lý');
         }
 
         if (dto.action === 'APPROVE') {
-            // Chấp nhận: tạo artist profile và cập nhật role
             await this.prisma.$transaction(async (tx) => {
-                // Cập nhật vai trò người dùng
+
                 await tx.users.update({
                     where: { id: application.user_id },
                     data: { role: 'ARTIST' },
                 });
 
-                // Tạo artist profile
                 await tx.artist_profiles.create({
                     data: {
                         user_id: application.user_id,
@@ -261,7 +242,6 @@ export class AdminService {
                     },
                 });
 
-                // Cập nhật trạng thái ứng dụng
                 await tx.artist_applications.update({
                     where: { id: applicationId },
                     data: {
@@ -270,22 +250,20 @@ export class AdminService {
                 });
             });
 
-            return { message: 'Ứng dụng đã được chấp nhận' };
+            return { message: 'Chấp nhận yêu cầu thành công' };
         } else {
-            // Từ chối
             await this.prisma.artist_applications.update({
                 where: { id: applicationId },
                 data: {
                     status: 'REJECTED',
-                    rejection_reason: dto.reason || 'Không đáp ứng yêu cầu',
+                    rejection_reason: dto.rejectionReason || 'Không đáp ứng yêu cầu',
                 },
             });
 
-            return { message: 'Ứng dụng đã bị từ chối' };
+            return { message: 'Từ chối yêu cầu thành công' };
         }
     }
 
-    // Lấy danh sách báo cáo
     async getReports(filter: ReportFilterDto) {
         const {
             status,
@@ -304,8 +282,8 @@ export class AdminService {
         if (type) where.report_type = type;
         if (startDate || endDate) {
             where.report_date = {};
-            if (startDate) where.report_date.gte = startDate;
-            if (endDate) where.report_date.lte = endDate;
+            if (startDate) where.report_date.gte = new Date(startDate);
+            if (endDate) where.report_date.lte = new Date(endDate);
         }
 
         const [reports, total] = await Promise.all([
@@ -343,7 +321,6 @@ export class AdminService {
         };
     }
 
-    // Xử lý báo cáo
     async resolveReport(reportId: number, dto: ResolveReportDto) {
         const report = await this.prisma.reports.findUnique({
             where: { id: reportId },
@@ -362,12 +339,11 @@ export class AdminService {
         });
 
         return {
-            message: 'Báo cáo đã được xử lý',
+            message: 'Xử lý báo cáo thành công',
             report: updatedReport,
         };
     }
 
-    // Xóa bài hát
     async deleteMusic(trackId: number) {
         const track = await this.prisma.music.findUnique({
             where: { id: trackId },
@@ -380,10 +356,8 @@ export class AdminService {
             throw new NotFoundException('Bài hát không tồn tại');
         }
 
-        // Xóa file từ storage
         await this.storageService.deleteFile('music', track.file_url);
 
-        // Xóa từ database
         await this.prisma.music.delete({
             where: { id: trackId },
         });
@@ -391,7 +365,6 @@ export class AdminService {
         return { message: 'Xóa bài hát thành công' };
     }
 
-    // Lấy thông tin chi tiết người dùng
     async getUserDetails(userId: number) {
         const user = await this.prisma.users.findUnique({
             where: { id: userId, is_deleted: false },
@@ -424,7 +397,6 @@ export class AdminService {
             throw new NotFoundException('Người dùng không tồn tại');
         }
 
-        // Nếu là artist, lấy thêm thông tin âm nhạc
         if (user.role === 'ARTIST' && user.artist_profiles) {
             const musicStats = await this.prisma.music.findMany({
                 where: { artist_id: user.artist_profiles.id },

@@ -34,7 +34,6 @@ import {
 export class AdminController {
     constructor(private readonly adminService: AdminService) { }
 
-    // Quản lý tài khoản
     @Post('accounts/assign-role')
     @ApiOperation({ summary: 'Gán vai trò cho tài khoản' })
     async assignRole(@Body() dto: AssignRoleDto) {
@@ -49,7 +48,6 @@ export class AdminController {
 
     @Delete('accounts/:userId')
     @ApiOperation({ summary: 'Xóa tài khoản' })
-    @HttpCode(HttpStatus.NO_CONTENT)
     async deleteAccount(
         @Param('userId') userId: string,
         @Body() dto: DeleteAccountDto,
@@ -57,21 +55,20 @@ export class AdminController {
         return this.adminService.deleteAccount(Number(userId), dto);
     }
 
-    @Post('accounts/:userId/reset-password')
-    @ApiOperation({ summary: 'Reset mật khẩu người dùng' })
-    async resetUserPassword(@Param('userId') userId: string) {
-        return this.adminService.resetUserPassword(Number(userId));
-    }
+    // @Post('accounts/:userId/reset-password')
+    // @ApiOperation({ summary: 'Reset mật khẩu người dùng' })
+    // async resetUserPassword(@Param('userId') userId: string) {
+    //     return this.adminService.resetUserPassword(Number(userId));
+    // }
 
-    // Quản lý ứng dụng artist
     @Get('artist-applications')
-    @ApiOperation({ summary: 'Lấy danh sách ứng dụng artist' })
+    @ApiOperation({ summary: 'Lấy danh sách yêu cầu làm artist' })
     async getArtistApplications(@Query() filter: ArtistApplicationFilterDto) {
         return this.adminService.getArtistApplications(filter);
     }
 
     @Patch('artist-applications/:id/process')
-    @ApiOperation({ summary: 'Xử lý ứng dụng artist' })
+    @ApiOperation({ summary: 'Xử lý yêu cầu làm artist' })
     async processArtistApplication(
         @Param('id') id: string,
         @Body() dto: ProcessApplicationDto,
@@ -79,7 +76,6 @@ export class AdminController {
         return this.adminService.processArtistApplication(Number(id), dto);
     }
 
-    // Quản lý báo cáo
     @Get('reports')
     @ApiOperation({ summary: 'Lấy danh sách báo cáo' })
     async getReports(@Query() filter: ReportFilterDto) {
@@ -95,7 +91,6 @@ export class AdminController {
         return this.adminService.resolveReport(Number(id), dto);
     }
 
-    // Quản lý âm nhạc
     @Delete('music/:trackId')
     @ApiOperation({ summary: 'Xóa bài hát' })
     @HttpCode(HttpStatus.NO_CONTENT)
@@ -103,7 +98,6 @@ export class AdminController {
         return this.adminService.deleteMusic(Number(trackId));
     }
 
-    // Thông tin người dùng/artist
     @Get('users/:userId/details')
     @ApiOperation({ summary: 'Lấy thông tin chi tiết người dùng' })
     async getUserDetails(@Param('userId') userId: string) {
