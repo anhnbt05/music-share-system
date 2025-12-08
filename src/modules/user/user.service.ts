@@ -1,4 +1,3 @@
-// src/user/user.service.ts
 import {
     Injectable,
     NotFoundException,
@@ -6,6 +5,7 @@ import {
     ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { toCamelCase } from 'src/libs/common/utils/transform.util';
 import {
     CreatePlaylistDto,
     UpdatePlaylistDto,
@@ -20,7 +20,6 @@ import {
 export class UserService {
     constructor(private readonly prisma: PrismaService) { }
 
-    // Tạo playlist
     async createPlaylist(userId: number, dto: CreatePlaylistDto) {
         const playlist = await this.prisma.playlists.create({
             data: {
@@ -36,7 +35,6 @@ export class UserService {
         };
     }
 
-    // Lấy danh sách playlist của user
     async getUserPlaylists(userId: number) {
         const playlists = await this.prisma.playlists.findMany({
             where: { user_id: userId },
@@ -49,13 +47,13 @@ export class UserService {
                             },
                         },
                     },
-                    take: 3, // Lấy 3 bài đầu tiên để preview
+                    take: 3,
                 },
             },
             orderBy: { creation_date: 'desc' },
         });
 
-        return playlists;
+        return toCamelCase(playlists);
     }
 
     // Lấy chi tiết playlist

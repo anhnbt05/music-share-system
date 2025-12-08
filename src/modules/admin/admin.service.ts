@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { StorageService } from '../storage/storage.service';
+import { toCamelCase } from 'src/libs/common/utils/transform.util';
 import {
     AssignRoleDto,
     SearchAccountDto,
@@ -112,7 +113,7 @@ export class AdminService {
         ]);
 
         return {
-            data: users,
+            data: toCamelCase(users),
             meta: {
                 page,
                 limit,
@@ -198,7 +199,7 @@ export class AdminService {
         ]);
 
         return {
-            data: applications,
+            data: toCamelCase(applications),
             meta: {
                 page,
                 limit,
@@ -311,7 +312,7 @@ export class AdminService {
         ]);
 
         return {
-            data: reports,
+            data: toCamelCase(reports),
             meta: {
                 page,
                 limit,
@@ -412,6 +413,6 @@ export class AdminService {
             };
         }
 
-        return user;
+        return toCamelCase(user);
     }
 }
