@@ -31,14 +31,25 @@ export class UpdatePlaylistDto {
     @Length(1, 100)
     name?: string;
 
+    // @ApiProperty({
+    //     required: false,
+    //     example: 'Mô tả mới cho playlist',
+    //     description: 'Mô tả mới của playlist',
+    // })
+    // @IsOptional()
+    // @IsString()
+    // description?: string;
+}
+
+export class DeletePlaylistDto {
     @ApiProperty({
         required: false,
-        example: 'Mô tả mới cho playlist',
-        description: 'Mô tả mới của playlist',
+        example: true,
+        description: 'Xác nhận xóa (bắt buộc đặt true)',
     })
     @IsOptional()
-    @IsString()
-    description?: string;
+    @IsBoolean()
+    confirm?: boolean = false;
 }
 
 export class AddTrackToPlaylistDto {
@@ -52,13 +63,6 @@ export class AddTrackToPlaylistDto {
 }
 
 export class RemoveTrackFromPlaylistDto {
-    @ApiProperty({
-        example: 55,
-        description: 'ID bài hát muốn xóa khỏi playlist',
-    })
-    @IsInt()
-    @Min(1)
-    trackId: number;
 
     @ApiProperty({
         required: false,

@@ -24,13 +24,4 @@ export class CreateReportDto {
     })
     @IsString()
     reason: string;
-
-    @ApiProperty({
-        required: false,
-        example: 'Ghi chú xử lý hoặc mô tả thêm',
-        description: 'Ghi chú bổ sung để người quản trị dễ xử lý',
-    })
-    @IsOptional()
-    @IsString()
-    resolutionNote?: string;
 }

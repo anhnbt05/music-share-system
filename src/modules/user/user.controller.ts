@@ -19,8 +19,8 @@ import {
     AddTrackToPlaylistDto,
     RemoveTrackFromPlaylistDto,
     VoteDto,
-    FollowArtistDto,
     CreateReportDto,
+    DeletePlaylistDto,
 } from './dtos';
 
 @ApiTags('User')
@@ -70,7 +70,7 @@ export class UserController {
     async deletePlaylist(
         @Req() req: any,
         @Param('playlistId') playlistId: string,
-        @Body() dto: RemoveTrackFromPlaylistDto,
+        @Body() dto: DeletePlaylistDto,
     ) {
         const userId = req.user.id;
         return this.userService.deletePlaylist(userId, Number(playlistId), dto);
@@ -108,7 +108,6 @@ export class UserController {
         );
     }
 
-    // Vote/Like
     @Post('music/:trackId/vote')
     @ApiOperation({ summary: 'Vote/Thích bài hát' })
     async voteTrack(
@@ -130,16 +129,14 @@ export class UserController {
         return this.userService.unvoteTrack(userId, Number(trackId));
     }
 
-    // Follow artist
     @Post('artists/:artistId/follow')
     @ApiOperation({ summary: 'Theo dõi artist' })
     async followArtist(
         @Req() req: any,
         @Param('artistId') artistId: string,
-        @Body() dto: FollowArtistDto,
     ) {
         const userId = req.user.id;
-        return this.userService.followArtist(userId, Number(artistId), dto);
+        return this.userService.followArtist(userId, Number(artistId));
     }
 
     @Delete('artists/:artistId/follow')
@@ -159,7 +156,6 @@ export class UserController {
         return this.userService.getFollowingArtists(userId);
     }
 
-    // Report
     @Post('reports')
     @ApiOperation({ summary: 'Tạo báo cáo' })
     async createReport(@Req() req: any, @Body() dto: CreateReportDto) {
