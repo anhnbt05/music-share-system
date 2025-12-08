@@ -12,8 +12,8 @@ import {
     AddTrackToPlaylistDto,
     RemoveTrackFromPlaylistDto,
     VoteDto,
-    FollowArtistDto,
     CreateReportDto,
+    DeletePlaylistDto,
 } from './dtos';
 
 @Injectable()
@@ -56,7 +56,6 @@ export class UserService {
         return toCamelCase(playlists);
     }
 
-    // Lấy chi tiết playlist
     async getPlaylistDetail(userId: number, playlistId: number) {
         const playlist = await this.prisma.playlists.findFirst({
             where: {
@@ -83,10 +82,9 @@ export class UserService {
             throw new NotFoundException('Playlist không tồn tại');
         }
 
-        return playlist;
+        return toCamelCase(playlist);
     }
 
-    // Cập nhật playlist
     async updatePlaylist(
         userId: number,
         playlistId: number,
@@ -114,11 +112,10 @@ export class UserService {
         };
     }
 
-    // Xóa playlist
     async deletePlaylist(
         userId: number,
         playlistId: number,
-        dto: RemoveTrackFromPlaylistDto,
+        dto: DeletePlaylistDto,
     ) {
         if (!dto.confirm) {
             throw new BadRequestException('Vui lòng xác nhận xóa playlist');
@@ -135,12 +132,10 @@ export class UserService {
             throw new NotFoundException('Playlist không tồn tại');
         }
 
-        // Xóa tất cả bài hát trong playlist trước
         await this.prisma.playlist_tracks.deleteMany({
             where: { playlist_id: playlistId },
         });
 
-        // Xóa playlist
         await this.prisma.playlists.delete({
             where: { id: playlistId },
         });
@@ -148,13 +143,12 @@ export class UserService {
         return { message: 'Xóa playlist thành công' };
     }
 
-    // Thêm bài hát vào playlist
     async addTrackToPlaylist(
         userId: number,
         playlistId: number,
         dto: AddTrackToPlaylistDto,
     ) {
-        // Kiểm tra playlist tồn tại và thuộc về user
+
         const playlist = await this.prisma.playlists.findFirst({
             where: {
                 id: playlistId,
@@ -166,7 +160,6 @@ export class UserService {
             throw new NotFoundException('Playlist không tồn tại');
         }
 
-        // Kiểm tra bài hát tồn tại
         const track = await this.prisma.music.findUnique({
             where: { id: dto.trackId },
         });
@@ -175,7 +168,6 @@ export class UserService {
             throw new NotFoundException('Bài hát không tồn tại');
         }
 
-        // Kiểm tra đã có trong playlist chưa
         const existing = await this.prisma.playlist_tracks.findFirst({
             where: {
                 playlist_id: playlistId,
@@ -187,7 +179,6 @@ export class UserService {
             throw new BadRequestException('Bài hát đã có trong playlist');
         }
 
-        // Lấy số lượng bài hát hiện tại để set order
         const trackCount = await this.prisma.playlist_tracks.count({
             where: { playlist_id: playlistId },
         });
@@ -214,7 +205,6 @@ export class UserService {
         };
     }
 
-    // Xóa bài hát khỏi playlist
     async removeTrackFromPlaylist(
         userId: number,
         playlistId: number,
@@ -222,10 +212,9 @@ export class UserService {
         dto: RemoveTrackFromPlaylistDto,
     ) {
         if (!dto.confirm) {
-            throw new BadRequestException('Vui lòng xác nhận xóa bài hát');
+            throw new BadRequestException('Vui lòng xác nhận xóa bài hát khỏi playlist');
         }
 
-        // Kiểm tra playlist tồn tại và thuộc về user
         const playlist = await this.prisma.playlists.findFirst({
             where: {
                 id: playlistId,
@@ -237,7 +226,6 @@ export class UserService {
             throw new NotFoundException('Playlist không tồn tại');
         }
 
-        // Xóa liên kết
         await this.prisma.playlist_tracks.deleteMany({
             where: {
                 playlist_id: playlistId,
@@ -245,13 +233,11 @@ export class UserService {
             },
         });
 
-        // Cập nhật order của các bài hát còn lại
         const remainingTracks = await this.prisma.playlist_tracks.findMany({
             where: { playlist_id: playlistId },
             orderBy: { track_order: 'asc' },
         });
 
-        // Update order
         for (let i = 0; i < remainingTracks.length; i++) {
             await this.prisma.playlist_tracks.update({
                 where: { id: remainingTracks[i].id },
@@ -262,7 +248,6 @@ export class UserService {
         return { message: 'Xóa bài hát khỏi playlist thành công' };
     }
 
-    // Vote bài hát
     async voteTrack(userId: number, trackId: number, dto: VoteDto) {
         const track = await this.prisma.music.findUnique({
             where: { id: trackId },
@@ -272,7 +257,6 @@ export class UserService {
             throw new NotFoundException('Bài hát không tồn tại');
         }
 
-        // Kiểm tra đã vote chưa
         const existingVote = await this.prisma.votes.findFirst({
             where: {
                 user_id: userId,
@@ -284,7 +268,6 @@ export class UserService {
             throw new BadRequestException('Bạn đã vote bài hát này');
         }
 
-        // Tạo vote
         const vote = await this.prisma.votes.create({
             data: {
                 user_id: userId,
@@ -294,7 +277,6 @@ export class UserService {
             },
         });
 
-        // Tăng vote count
         await this.prisma.music.update({
             where: { id: trackId },
             data: {
@@ -308,7 +290,6 @@ export class UserService {
         };
     }
 
-    // Hủy vote
     async unvoteTrack(userId: number, trackId: number) {
         const vote = await this.prisma.votes.findFirst({
             where: {
@@ -325,7 +306,6 @@ export class UserService {
             where: { id: vote.id },
         });
 
-        // Giảm vote count
         await this.prisma.music.update({
             where: { id: trackId },
             data: {
@@ -336,8 +316,7 @@ export class UserService {
         return { message: 'Hủy vote thành công' };
     }
 
-    // Theo dõi artist
-    async followArtist(userId: number, artistId: number, dto: FollowArtistDto) {
+    async followArtist(userId: number, artistId: number) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { id: artistId },
         });
@@ -346,7 +325,6 @@ export class UserService {
             throw new NotFoundException('Artist không tồn tại');
         }
 
-        // Kiểm tra đã follow chưa
         const existingFollow = await this.prisma.follows.findFirst({
             where: {
                 follower_user_id: userId,
@@ -372,7 +350,6 @@ export class UserService {
         };
     }
 
-    // Bỏ theo dõi artist
     async unfollowArtist(userId: number, artistId: number) {
         const follow = await this.prisma.follows.findFirst({
             where: {
@@ -392,7 +369,6 @@ export class UserService {
         return { message: 'Bỏ theo dõi artist thành công' };
     }
 
-    // Lấy danh sách artist đang theo dõi
     async getFollowingArtists(userId: number) {
         const follows = await this.prisma.follows.findMany({
             where: { follower_user_id: userId },
@@ -419,9 +395,7 @@ export class UserService {
         return follows.map((follow) => follow.artist_profiles);
     }
 
-    // Tạo báo cáo
     async createReport(userId: number, dto: CreateReportDto) {
-        // Kiểm tra target tồn tại
         let targetExists = false;
         switch (dto.targetType) {
             case 'MUSIC':
@@ -437,7 +411,6 @@ export class UserService {
                 targetExists = !!user;
                 break;
             case 'COMMENT':
-                // Chưa có model comment trong schema
                 targetExists = false;
                 break;
             case 'PLAYLIST':
@@ -452,13 +425,11 @@ export class UserService {
             throw new NotFoundException('Đối tượng báo cáo không tồn tại');
         }
 
-        // Tạo báo cáo
         const report = await this.prisma.reports.create({
             data: {
                 reporter_user_id: userId,
                 report_type: dto.targetType,
                 reason: dto.reason,
-                resolution_notes: dto.resolutionNote,
                 report_date: new Date(),
                 status: 'PENDING',
                 ...(dto.targetType === 'MUSIC' && { reported_music_id: dto.targetId }),
