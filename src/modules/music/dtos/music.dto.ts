@@ -48,15 +48,6 @@ export class SearchMusicDto {
     limit: number = 10;
 }
 
-export class StreamMusicDto {
-    @ApiProperty({
-        example: 123,
-        description: "ID của bài hát cần stream"
-    })
-    @IsInt()
-    trackId: number;
-}
-
 export class ShareMusicDto {
     @ApiProperty({
         example: 123,
