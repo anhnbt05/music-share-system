@@ -5,20 +5,20 @@ export class AnalyticsFilterDto {
     @ApiProperty({
         required: false,
         example: '2025-01-01',
-        description: 'Ngày bắt đầu thống kê (ISO Date)'
+        description: 'Ngày bắt đầu thống kê'
     })
     @IsOptional()
     @IsDateString()
-    startDate?: Date;
+    startDate?: string;
 
     @ApiProperty({
         required: false,
         example: '2025-01-31',
-        description: 'Ngày kết thúc thống kê (ISO Date)'
+        description: 'Ngày kết thúc thống kê'
     })
     @IsOptional()
     @IsDateString()
-    endDate?: Date;
+    endDate?: string;
 
     @ApiProperty({
         required: false,

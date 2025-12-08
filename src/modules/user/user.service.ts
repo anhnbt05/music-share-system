@@ -392,7 +392,7 @@ export class UserService {
             orderBy: { created_at: 'desc' },
         });
 
-        return follows.map((follow) => follow.artist_profiles);
+        return toCamelCase(follows.map((follow) => follow.artist_profiles));
     }
 
     async createReport(userId: number, dto: CreateReportDto) {
