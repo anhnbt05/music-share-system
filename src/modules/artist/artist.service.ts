@@ -1,4 +1,3 @@
-// src/artist/artist.service.ts
 import {
     Injectable,
     NotFoundException,
@@ -16,6 +15,8 @@ import {
     AnalyticsFilterDto,
 } from './dtos';
 import { album_tracks } from '@prisma/client';
+import { toCamelCase } from 'src/libs/common/utils/transform.util';
+import { UpdateProfileDto } from './dtos/profile.dto';
 
 @Injectable()
 export class ArtistService {
@@ -24,13 +25,11 @@ export class ArtistService {
         private readonly storageService: StorageService,
     ) { }
 
-    // Upload bài hát
     async uploadMusic(
         userId: number,
         dto: UploadMusicDto,
         file: Express.Multer.File,
     ) {
-        // Lấy artist profile của user
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
         });
@@ -39,7 +38,6 @@ export class ArtistService {
             throw new ForbiddenException('Bạn không phải là artist');
         }
 
-        // Validate file
         if (!file) {
             throw new BadRequestException('Vui lòng chọn file âm nhạc');
         }
@@ -52,11 +50,9 @@ export class ArtistService {
         }
 
         if (file.size > 50 * 1024 * 1024) {
-            // 50MB
             throw new BadRequestException('File quá lớn. Kích thước tối đa 50MB');
         }
 
-        // Upload file lên storage
         const uploadResult = await this.storageService.uploadFile(file, {
             bucket: 'music',
             folder: 'tracks',
@@ -64,7 +60,6 @@ export class ArtistService {
             maxFileSize: 50 * 1024 * 1024,
         });
 
-        // Lưu vào database
         const music = await this.prisma.music.create({
             data: {
                 artist_id: artistProfile.id,
@@ -77,7 +72,6 @@ export class ArtistService {
             },
         });
 
-        // Tạo music stats
         await this.prisma.music_stats.create({
             data: {
                 music_id: music.id,
@@ -93,7 +87,6 @@ export class ArtistService {
         };
     }
 
-    // Lấy danh sách bài hát của artist
     async getArtistMusic(userId: number) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
@@ -120,13 +113,11 @@ export class ArtistService {
         return music;
     }
 
-    // Cập nhật thông tin bài hát
     async updateMusic(
         userId: number,
         trackId: number,
         dto: UpdateMusicDto,
     ) {
-        // Lấy artist profile
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
         });
@@ -135,7 +126,6 @@ export class ArtistService {
             throw new ForbiddenException('Bạn không phải là artist');
         }
 
-        // Kiểm tra bài hát thuộc về artist
         const track = await this.prisma.music.findFirst({
             where: {
                 id: trackId,
@@ -158,9 +148,7 @@ export class ArtistService {
         };
     }
 
-    // Xóa bài hát
     async deleteMusic(userId: number, trackId: number) {
-        // Lấy artist profile
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
         });
@@ -169,7 +157,6 @@ export class ArtistService {
             throw new ForbiddenException('Bạn không phải là artist');
         }
 
-        // Kiểm tra bài hát thuộc về artist
         const track = await this.prisma.music.findFirst({
             where: {
                 id: trackId,
@@ -181,10 +168,8 @@ export class ArtistService {
             throw new NotFoundException('Bài hát không tồn tại hoặc không thuộc về bạn');
         }
 
-        // Xóa file từ storage
         await this.storageService.deleteFile('music', track.file_url);
 
-        // Xóa từ database (cascade sẽ xóa các bảng liên quan)
         await this.prisma.music.delete({
             where: { id: trackId },
         });
@@ -192,7 +177,6 @@ export class ArtistService {
         return { message: 'Xóa bài hát thành công' };
     }
 
-    // Tạo album
     async createAlbum(userId: number, dto: CreateAlbumDto) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
@@ -217,7 +201,6 @@ export class ArtistService {
         };
     }
 
-    // Lấy danh sách album của artist
     async getArtistAlbums(userId: number) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
@@ -239,10 +222,9 @@ export class ArtistService {
             orderBy: { created_at: 'desc' },
         });
 
-        return albums;
+        return toCamelCase(albums);
     }
 
-    // Lấy chi tiết album
     async getAlbumDetail(userId: number, albumId: number) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
@@ -279,7 +261,6 @@ export class ArtistService {
         return album;
     }
 
-    // Cập nhật album
     async updateAlbum(
         userId: number,
         albumId: number,
@@ -306,7 +287,11 @@ export class ArtistService {
 
         const updatedAlbum = await this.prisma.albums.update({
             where: { id: albumId },
-            data: dto,
+            data: {
+                title: dto.title,
+                description: dto.description,
+                cover_url: dto.coverUrl
+            },
         });
 
         return {
@@ -315,7 +300,6 @@ export class ArtistService {
         };
     }
 
-    // Xóa album
     async deleteAlbum(userId: number, albumId: number) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
@@ -336,20 +320,16 @@ export class ArtistService {
             throw new NotFoundException('Album không tồn tại');
         }
 
-        // Xóa tất cả bài hát trong album trước
         await this.prisma.album_tracks.deleteMany({
             where: { album_id: albumId },
         });
 
-        // Xóa album
         await this.prisma.albums.delete({
             where: { id: albumId },
         });
 
         return { message: 'Xóa album thành công' };
     }
-
-    // Thêm bài hát vào album
 
     async addTracksToAlbum(
         userId: number,
@@ -364,7 +344,6 @@ export class ArtistService {
             throw new ForbiddenException('Bạn không phải là artist');
         }
 
-        // Kiểm tra album thuộc artist
         const album = await this.prisma.albums.findFirst({
             where: {
                 id: albumId,
@@ -376,7 +355,6 @@ export class ArtistService {
             throw new NotFoundException('Album không tồn tại');
         }
 
-        // Kiểm tra tất cả bài hát thuộc artist
         const tracks = await this.prisma.music.findMany({
             where: {
                 id: { in: dto.trackIds },
@@ -388,11 +366,7 @@ export class ArtistService {
             throw new BadRequestException('Một số bài hát không thuộc về bạn');
         }
 
-        // ================================
-        // 🚀 Dùng transaction cho toàn bộ logic
-        // ================================
         const result = await this.prisma.$transaction(async (tx) => {
-            // Lấy số lượng bài hát hiện có
             const existingCount = await tx.album_tracks.count({
                 where: { album_id: albumId },
             });
@@ -403,7 +377,6 @@ export class ArtistService {
                 const trackId = dto.trackIds[i];
                 const trackOrder = dto.trackOrder?.[i] || existingCount + i + 1;
 
-                // Kiểm tra trùng
                 const exists = await tx.album_tracks.findFirst({
                     where: { album_id: albumId, track_id: trackId },
                 });
@@ -412,7 +385,6 @@ export class ArtistService {
                     throw new BadRequestException(`Bài hát ID ${trackId} đã có trong album`);
                 }
 
-                // Tạo mới album_track
                 const albumTrack = await tx.album_tracks.create({
                     data: {
                         album_id: albumId,
@@ -434,8 +406,6 @@ export class ArtistService {
         };
     }
 
-
-    // Xóa bài hát khỏi album
     async removeTrackFromAlbum(
         userId: number,
         albumId: number,
@@ -449,7 +419,6 @@ export class ArtistService {
             throw new ForbiddenException('Bạn không phải là artist');
         }
 
-        // Kiểm tra album tồn tại và thuộc về artist
         const album = await this.prisma.albums.findFirst({
             where: {
                 id: albumId,
@@ -461,7 +430,6 @@ export class ArtistService {
             throw new NotFoundException('Album không tồn tại');
         }
 
-        // Xóa liên kết
         await this.prisma.album_tracks.deleteMany({
             where: {
                 album_id: albumId,
@@ -469,7 +437,6 @@ export class ArtistService {
             },
         });
 
-        // Cập nhật order của các bài hát còn lại
         const remainingTracks = await this.prisma.album_tracks.findMany({
             where: { album_id: albumId },
             orderBy: { track_order: 'asc' },
@@ -485,7 +452,6 @@ export class ArtistService {
         return { message: 'Xóa bài hát khỏi album thành công' };
     }
 
-    // Lấy thống kê
     async getAnalytics(userId: number, filter: AnalyticsFilterDto) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
@@ -503,8 +469,8 @@ export class ArtistService {
 
         if (filter.startDate || filter.endDate) {
             where.updated_at = {};
-            if (filter.startDate) where.updated_at.gte = filter.startDate;
-            if (filter.endDate) where.updated_at.lte = filter.endDate;
+            if (filter.startDate) where.updated_at.gte = new Date(filter.startDate);
+            if (filter.endDate) where.updated_at.lte = new Date(filter.endDate);
         }
 
         if (filter.trackId) {
@@ -519,7 +485,6 @@ export class ArtistService {
             orderBy: { updated_at: 'desc' },
         });
 
-        // Tổng hợp thống kê
         const totalListens = stats.reduce((sum, stat) => sum + stat.listens, 0);
         const totalShares = stats.reduce((sum, stat) => sum + stat.shares, 0);
         const topTracks = [...stats]
@@ -538,8 +503,7 @@ export class ArtistService {
         };
     }
 
-    // Cập nhật profile artist
-    async updateProfile(userId: number, dto: UpdateAlbumDto) {
+    async updateProfile(userId: number, dto: UpdateProfileDto) {
         const artistProfile = await this.prisma.artist_profiles.findUnique({
             where: { user_id: userId },
         });
@@ -551,7 +515,10 @@ export class ArtistService {
         const updatedProfile = await this.prisma.artist_profiles.update({
             where: { id: artistProfile.id },
             data: {
-                ...dto,
+                bio: dto.bio,
+                photo_url: dto.photoUrl,
+                social_links: dto.socialLinks,
+                stage_name: dto.stageName,
                 updated_at: new Date(),
             },
         });
@@ -561,4 +528,5 @@ export class ArtistService {
             profile: updatedProfile,
         };
     }
+
 }

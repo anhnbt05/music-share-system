@@ -1,4 +1,3 @@
-// src/artist/artist.controller.ts
 import {
     Controller,
     Get,
@@ -12,9 +11,12 @@ import {
     Req,
     UploadedFile,
     UseInterceptors,
+    ValidationPipe,
+    UsePipes,
+    Patch
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../libs/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../libs/common/guards/role.guard'
 import { Roles } from '../../libs/common/decorators/role.decorator'
@@ -28,6 +30,7 @@ import {
     AddTracksToAlbumDto,
     AnalyticsFilterDto,
 } from './dtos';
+import { UpdateProfileDto } from './dtos/profile.dto';
 
 @ApiTags('Artist')
 @ApiBearerAuth()
@@ -40,11 +43,25 @@ export class ArtistController {
         private readonly storageService: StorageService,
     ) { }
 
-    // Upload music
     @Post('music')
     @ApiOperation({ summary: 'Upload bài hát mới' })
     @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                title: { type: 'string' },
+                genre: { type: 'string' },
+                description: { type: 'string' },
+                file: {
+                    type: 'string',
+                    format: 'binary'
+                }
+            }
+        }
+    })
     @UseInterceptors(FileInterceptor('file'))
+    @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }))
     async uploadMusic(
         @Req() req: any,
         @Body() dto: UploadMusicDto,
@@ -82,7 +99,6 @@ export class ArtistController {
         return this.artistService.deleteMusic(userId, Number(trackId));
     }
 
-    // Album management
     @Post('albums')
     @ApiOperation({ summary: 'Tạo album mới' })
     async createAlbum(@Req() req: any, @Body() dto: CreateAlbumDto) {
@@ -158,7 +174,6 @@ export class ArtistController {
         );
     }
 
-    // Analytics
     @Get('analytics')
     @ApiOperation({ summary: 'Lấy thống kê âm nhạc' })
     async getAnalytics(
@@ -169,12 +184,11 @@ export class ArtistController {
         return this.artistService.getAnalytics(userId, filter);
     }
 
-    // Profile
-    @Put('profile')
+    @Patch('profile')
     @ApiOperation({ summary: 'Cập nhật profile artist' })
     async updateProfile(
         @Req() req: any,
-        @Body() dto: UpdateAlbumDto, // Reuse album DTO for now
+        @Body() dto: UpdateProfileDto,
     ) {
         const userId = req.user.id;
         return this.artistService.updateProfile(userId, dto);
