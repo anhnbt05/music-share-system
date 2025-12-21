@@ -184,6 +184,13 @@ export class ArtistController {
         return this.artistService.getAnalytics(userId, filter);
     }
 
+    @Get('profile')
+    @ApiOperation({ summary: 'Lấy thông tin profile artist (dashboard)' })
+    async getArtistProfile(@Req() req: any) {
+        const userId = req.user.id;
+        return this.artistService.getArtistProfile(userId);
+    }
+
     @Patch('profile')
     @ApiOperation({ summary: 'Cập nhật profile artist' })
     async updateProfile(

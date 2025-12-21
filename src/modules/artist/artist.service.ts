@@ -529,4 +529,56 @@ export class ArtistService {
         };
     }
 
+    async getArtistProfile(userId: number) {
+        const artistProfile = await this.prisma.artist_profiles.findUnique({
+            where: { user_id: userId },
+            include: {
+                users: {
+                    select: {
+                        id: true,
+                        email: true,
+                        name: true,
+                        role: true,
+                        created_at: true,
+                    },
+                },
+                albums: {
+                    orderBy: { created_at: 'desc' },
+                    include: {
+                        album_tracks: {
+                            orderBy: { track_order: 'asc' },
+                            include: {
+                                music: {
+                                    include: {
+                                        music_stats: true,
+                                        votes: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                music: {
+                    orderBy: { created_at: 'desc' },
+                    include: {
+                        music_stats: true,
+                        votes: true,
+                        album_tracks: {
+                            include: {
+                                albums: true,
+                            },
+                        },
+                    },
+                },
+                follows: true,
+            },
+        });
+
+        if (!artistProfile) {
+            throw new ForbiddenException('Bạn không phải là artist');
+        }
+
+        return toCamelCase(artistProfile);
+    }
+
 }
