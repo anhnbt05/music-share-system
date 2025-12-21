@@ -14,6 +14,7 @@ import {
     VoteDto,
     CreateReportDto,
     DeletePlaylistDto,
+    ApplyArtistDto,
 } from './dtos';
 
 @Injectable()
@@ -441,6 +442,53 @@ export class UserService {
         return {
             message: 'Báo cáo đã được gửi thành công',
             report,
+        };
+    }
+
+    async applyArtist(userId: number, dto: ApplyArtistDto) {
+        const user = await this.prisma.users.findUnique({
+            where: { id: userId },
+            include: { artist_profiles: true },
+        });
+
+        if (!user || user.is_deleted) {
+            throw new NotFoundException('User không tồn tại');
+        }
+
+        if (user.artist_profiles) {
+            throw new BadRequestException('Bạn đã là artist');
+        }
+
+        const existingApplication = await this.prisma.artist_applications.findFirst({
+            where: {
+                user_id: userId,
+                status: {
+                    in: ['PENDING', 'APPROVED'],
+                },
+            },
+        });
+
+        if (existingApplication) {
+            throw new BadRequestException(
+                'Bạn đã gửi đơn ứng tuyển trước đó, vui lòng chờ xét duyệt',
+            );
+        }
+
+        const application = await this.prisma.artist_applications.create({
+            data: {
+                user_id: userId,
+                stage_name: dto.stageName,
+                bio: dto.bio,
+                photo_url: dto.photoUrl,
+                social_links: dto.socialLinks,
+                status: 'PENDING',
+                created_at: new Date(),
+            },
+        });
+
+        return {
+            message: 'Nộp đơn ứng tuyển làm artist thành công',
+            application: toCamelCase(application),
         };
     }
 }

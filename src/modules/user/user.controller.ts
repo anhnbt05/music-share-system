@@ -21,6 +21,7 @@ import {
     VoteDto,
     CreateReportDto,
     DeletePlaylistDto,
+    ApplyArtistDto,
 } from './dtos';
 
 @ApiTags('User')
@@ -161,5 +162,15 @@ export class UserController {
     async createReport(@Req() req: any, @Body() dto: CreateReportDto) {
         const userId = req.user.id;
         return this.userService.createReport(userId, dto);
+    }
+
+    @Post('artist-applications')
+    @ApiOperation({ summary: 'Nộp đơn ứng tuyển làm artist' })
+    async applyArtist(
+        @Req() req: any,
+        @Body() dto: ApplyArtistDto,
+    ) {
+        const userId = req.user.id;
+        return this.userService.applyArtist(userId, dto);
     }
 }
