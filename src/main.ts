@@ -4,6 +4,7 @@ import { getCorsOptions } from './config/cors.config';
 import { ConfigService } from '@nestjs/config';
 import { setupSwagger } from './config/swagger.config';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +25,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.use(cookieParser());
   await app.listen(process.env.PORT ?? 3000);
   console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
   console.log(`📘 Swagger docs available at http://localhost:${process.env.PORT}/api-docs`);
