@@ -145,6 +145,6 @@ export class AuthController {
             secure: true,
             sameSite: 'none'
         })
-        return this.authService.logout()
+        return res.json({ message: 'Đăng xuất thành công.' });
     }
 }

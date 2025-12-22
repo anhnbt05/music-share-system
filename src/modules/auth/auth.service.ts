@@ -156,8 +156,4 @@ export class AuthService {
 
         return { message: 'Đặt lại mật khẩu thành công.' };
     }
-
-    async logout() {
-        return { message: 'Đăng xuất thành công.' };
-    }
 }
