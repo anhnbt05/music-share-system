@@ -20,6 +20,12 @@ import { SearchMusicDto, ShareMusicDto } from './dtos';
 export class MusicController {
     constructor(private readonly musicService: MusicService) { }
 
+    @Get('all')
+    @ApiOperation({ summary: 'Lấy toàn bộ bài hát' })
+    async getAllMusic() {
+        return this.musicService.getAllMusic();
+    }
+
     @Get('search')
     @ApiOperation({ summary: 'Tìm kiếm âm nhạc' })
     async searchMusic(@Query() dto: SearchMusicDto) {
