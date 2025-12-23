@@ -21,7 +21,7 @@ export class MusicService {
         const { query, type, genre, page = 1, limit = 10 } = dto;
         const skip = (page - 1) * limit;
 
-        let where: any = {};
+        let where: any = { deleted_at: null };
         let include: any = {
             artist_profiles: {
                 include: {
@@ -116,7 +116,7 @@ export class MusicService {
 
     async getMusicDetail(trackId: number) {
         const music = await this.prisma.music.findUnique({
-            where: { id: trackId },
+            where: { id: trackId, deleted_at: null },
             include: {
                 artist_profiles: {
                     include: {
@@ -157,7 +157,7 @@ export class MusicService {
 
     async streamMusic(trackId: number) {
         const music = await this.prisma.music.findUnique({
-            where: { id: trackId },
+            where: { id: trackId, deleted_at: null },
         });
 
         if (!music) {
@@ -177,7 +177,7 @@ export class MusicService {
 
     async shareMusic(trackId: number, dto: ShareMusicDto) {
         const music = await this.prisma.music.findUnique({
-            where: { id: trackId },
+            where: { id: trackId, deleted_at: null },
             include: {
                 artist_profiles: true,
             },
@@ -249,7 +249,7 @@ export class MusicService {
     async getMusicByGenre(genre: string, page: number = 1, limit: number = 10) {
         const skip = (page - 1) * limit;
 
-        const where = { genre };
+        const where = { genre, deleted_at: null };
 
         const [music, total] = await Promise.all([
             this.prisma.music.findMany({
