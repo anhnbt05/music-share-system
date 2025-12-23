@@ -92,6 +92,7 @@ model music {
   playlist_tracks playlist_tracks[]
   reports         reports[]
   votes           votes[]
+  deleted_at      DateTime?
 }
 
 model music_stats {

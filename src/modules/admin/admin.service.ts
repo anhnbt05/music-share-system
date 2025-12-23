@@ -359,8 +359,9 @@ export class AdminService {
 
         await this.storageService.deleteFile('music', track.file_url);
 
-        await this.prisma.music.delete({
+        await this.prisma.music.update({
             where: { id: trackId },
+            data: { deleted_at: new Date() },
         });
 
         return { message: 'Xóa bài hát thành công' };

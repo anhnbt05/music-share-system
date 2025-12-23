@@ -97,7 +97,7 @@ export class ArtistService {
         }
 
         const music = await this.prisma.music.findMany({
-            where: { artist_id: artistProfile.id },
+            where: { artist_id: artistProfile.id, deleted_at: null },
             include: {
                 music_stats: true,
                 votes: true,
@@ -170,8 +170,9 @@ export class ArtistService {
 
         await this.storageService.deleteFile('music', track.file_url);
 
-        await this.prisma.music.delete({
+        await this.prisma.music.update({
             where: { id: trackId },
+            data: { deleted_at: new Date() },
         });
 
         return { message: 'Xóa bài hát thành công' };
