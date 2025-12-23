@@ -285,5 +285,27 @@ export class MusicService {
         };
     }
 
+    async getAllMusic() {
+        const music = await this.prisma.music.findMany({
+            where: { deleted_at: null },
+            include: {
+                artist_profiles: {
+                    include: {
+                        users: {
+                            select: { id: true, name: true, email: true },
+                        },
+                    },
+                },
+                music_stats: true,
+                album_tracks: {
+                    include: { albums: true },
+                },
+            },
+            orderBy: { vote_count: 'desc' },
+        });
+
+        return toCamelCase(music);
+    }
+
 }
 
